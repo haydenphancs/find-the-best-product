@@ -10,7 +10,7 @@ from show.models import Product
 from findprice.parse_each_website import find_name_amazon, find_price_amazon, find_image_amazon, get_url_amazon
 from findprice.parse_each_website import get_data_walmart, get_data_ebay
 
-
+ 
 def get_html(url):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36",
