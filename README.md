@@ -2,7 +2,7 @@
 
 ## Description
 
-Find the Best Product is a Python project designed to help users compare prices across different online markets, focusing on Amazon, Walmart, and Ebay. This tool automates the process of searching and comparing prices, so the users can pick the best product they want to buy instead of going after each website. It saves time and time is money!
+Find the Best Product is a Python project designed to help users compare prices across different online markets, focusing on Amazon, Walmart, and Ebay (and more). It shows on a Web-based. The users can pick the best product they want to buy instead of going after each website. It saves time and time is money!
 
 The project is continuous develop, feel free to contact and dig more into this idea.
 
