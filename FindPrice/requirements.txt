@@ -1,0 +1,5 @@
+Django==3.2.9
+djangorestframework==3.12.4
+sqlite3
+requests==2.25.1
+# Add other dependencies here
