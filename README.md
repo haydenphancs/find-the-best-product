@@ -2,9 +2,10 @@
 
 ## Description
 
-Find the Best Product is a Python project designed to help users compare prices across different online markets, focusing on Amazon, Walmart, and Ebay (and more). It shows on a Web-based. The users can pick the best product they want to buy instead of going after each website. It saves time and time is money!
-
-The project is continuous develop, feel free to contact and dig more into this idea.
+- Find the Best Product is a Python project designed to help users compare prices across different online markets, focusing on Amazon, Walmart, and eBay (and more).
+- The users can pick the best product they want to buy instead of going after each website. It saves time and time is money.
+- It’s a Web-based application.
+- The project is continuously developed, feel free to contact and dig more into this idea.
 
 ## Table of Contents
 
@@ -33,7 +34,7 @@ To get started with the project, follow these steps:
 3. **Install the required dependencies**:
 - Django
 - SQlite
-- The user can run all of this by runing this cmd
+- The user can run all of this by running this cmd
   
     ```sh
     pip install -r requirements.txt
@@ -65,8 +66,8 @@ Here are the basic steps to use the Find the Best Product tool:
 ## Features
 
 - Automated price comparison across multiple platforms
-- Searching a product
-- Supports searching on Amazon, Walmart, Ebay (and more)
+- Searching for a product
+- Supports searching on Amazon, Walmart, eBay (and more)
 
 
 ## License
