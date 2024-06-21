@@ -3,7 +3,16 @@
 {% load static %}
 
 {% block content %}
+    <form method="get" action="{% url 'search_results' %}">
+        <input type="text" name="product_name" placeholder="Search products...">
+        <button type="submit">Search</button>
+    </form>
     <h1>RESULTS: </h1>
+
+    <form action="{% url 'delete_all_data' %}">
+        {% csrf_token %}
+        <button type="submit">Delete Data</button>
+    </form>
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <div class="row">
         {% for product in products %}
