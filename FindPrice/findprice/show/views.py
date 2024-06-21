@@ -1,12 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Product
-#from django.contrib.auth.decorators import login_required
-#from django.apps import apps
-#from django.db import transaction
-#from django.contrib.admin.views.decorators import staff_member_required
 import asyncio
-import sys
-import os
+
 from django.http import HttpResponse
 from parse_each_website import get_data_walmart, get_data_ebay, get_data_amazon
 
