@@ -183,11 +183,49 @@ def get_data_ebay(search_query):
         print('Ebay Bad')
         return None
 
+
+# -------------------------------------------------------------------------
+# Add data to a product for Walmart and Ebay
+# -------------------------------------------------------------------------
+def add_product_data(get_name, get_price, get_link, get_image_link):
+    Product.objects.create(
+        name=get_name,
+        price=get_price,
+        link=get_link,
+        delivery_info=get_image_link
+    )
+
+
+# -------------------------------------------------------------------------
+# Add directly data to database for Amazon
+# -------------------------------------------------------------------------
+def save_to_db_amazon(get_name, get_price, get_link, get_image_link):
+    Product.objects.create(
+        name=get_name,
+        price=get_price,
+        link=get_link,
+        delivery_info=get_image_link
+    )
+
+# Wrap the synchronous function with sync_to_async
+add_product_data_amazon = sync_to_async(save_to_db_amazon)
+
+
+# -------------------------------------------------------------------------
+# Only get the price (number) of a string
+# -------------------------------------------------------------------------
+def extract_price(price_string):
+    # Use regular expression to find all parts of the string that match the pattern for a price
+    match = re.search(r'\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?', price_string)
+    if match:
+        return match.group(0)
+    return None
+
 # For BeautifulSoup to find amazon data
 # -------------------------------------------------------------------------
 # find data Amazon for each product
 # -------------------------------------------------------------------------
-#
+
 # def find_name_amazon(item):
 #     name_tag = item.find('span', id='productTitle', class_='a-size-large product-title-word-break').get_text(strip=True)
 #     if name_tag:
@@ -228,52 +266,3 @@ def get_data_ebay(search_query):
 # -------------------------------------------------------------------------
 # Add product to database for Walmart and Ebay
 # -------------------------------------------------------------------------
-
-# -------------------------------------------------------------------------
-# Add data to a product for Walmart and Ebay
-# -------------------------------------------------------------------------
-def add_product_data(get_name, get_price, get_link, get_image_link):
-    # from findprice.scraper import save_to_db
-    # products = []
-    # try:
-    #     products.append({
-    #         'name': get_name,
-    #         'price': get_price,
-    #         'link': get_link,
-    #         'delivery_info': get_image_link,
-    #     })
-    # except Exception as e:
-    #     print(f"Error passing data to product database: {e}")
-    # save_to_db(products)
-    Product.objects.create(
-        name=get_name,
-        price=get_price,
-        link=get_link,
-        delivery_info=get_image_link
-    )
-
-
-# -------------------------------------------------------------------------
-# Add directly data to database for Amazon
-# -------------------------------------------------------------------------
-def save_to_db_amazon(get_name, get_price, get_link, get_image_link):
-    Product.objects.create(
-        name=get_name,
-        price=get_price,
-        link=get_link,
-        delivery_info=get_image_link
-    )
-
-# Wrap the synchronous function with sync_to_async
-add_product_data_amazon = sync_to_async(save_to_db_amazon)
-
-
-# -------------------------------------------------------------------------
-# Only get the price (number) of a string
-# -------------------------------------------------------------------------
-def extract_price(price_string):
-    # Use regular expression to find all parts of the string that match the pattern for a price
-    match = re.search(r'\$\d{1,3}(?:,\d{3})*(?:\.\d{2})?', price_string)
-    if match:
-        return match.group(0)
-    return None

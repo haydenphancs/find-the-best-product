@@ -58,14 +58,14 @@ from findprice.parse_each_website import get_data_walmart, get_data_ebay, get_da
 #
 
 
-def save_to_db(products):
-    for product in products:
-        Product.objects.create(
-            name=product['name'],
-            price=product['price'],
-            link=product['link'],
-            delivery_info=product['delivery_info']
-        )
+# def save_to_db(products):
+#     for product in products:
+#         Product.objects.create(
+#             name=product['name'],
+#             price=product['price'],
+#             link=product['link'],
+#             delivery_info=product['delivery_info']
+#         )
 
 
 if __name__ == '__main__':
