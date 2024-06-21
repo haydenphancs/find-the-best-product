@@ -2,9 +2,10 @@
 
 ## Description
 
-Find the Best Product is a Python project designed to help users compare prices across different online markets, focusing on Amazon, Walmart, and Ebay. This tool automates the process of searching and comparing prices, so the users can pick the best product they want to buy instead of going after each website. It saves time and time is money!
-
-The project is continuous develop, feel free to contact and dig more into this idea.
+- Find the Best Product is a Python project designed to help users compare prices across different online markets, focusing on Amazon, Walmart, and eBay (and more).
+- The users can pick the best product they want to buy instead of going after each website. It saves time and time is money.
+- It’s a Web-based application.
+- The project is continuously developed, feel free to contact and dig more into this idea.
 
 ## Table of Contents
 
@@ -32,8 +33,8 @@ To get started with the project, follow these steps:
 
 3. **Install the required dependencies**:
 - Django
-- SQlite
-- The user can run all of this by runing this cmd
+- SQLite
+- The user can run all of this by running this cmd
   
     ```sh
     pip install -r requirements.txt
@@ -49,24 +50,20 @@ To get started with the project, follow these steps:
 
 Here are the basic steps to use the Find the Best Product tool:
 
-1. Run the main script:
+1. Run the database to connect to the local server:
     ```sh
-    python scraper.py #Mac: python3 scraper.py
-    ```
-2. Run the database connect to a local website:
-    ```sh
-    python3 manage.py runserver
+    python manage.py runserver #Mac: python3 manage.py runserver
     ```
 
-3. View the results and searching:
+2. View the results and searching:
 - Click on the local address (for example: http://127.0.0.1:8000/show/)
 
 
 ## Features
 
 - Automated price comparison across multiple platforms
-- Searching a product
-- Supports searching on Amazon, Walmart, Ebay (and more)
+- Searching for a product
+- Supports searching on Amazon, Walmart, eBay (and more)
 
 
 ## License
@@ -75,4 +72,4 @@ N/A
 
 ## Contact Information
 
-For any questions or feedback, please contact Hayden Phan : haydenphancs@gmail.com
+For any questions or feedback, please get in touch with Hayden Phan : haydenphancs@gmail.com
