@@ -33,7 +33,7 @@ To get started with the project, follow these steps:
 
 3. **Install the required dependencies**:
 - Django
-- SQlite
+- SQLite
 - The user can run all of this by running this cmd
   
     ```sh
@@ -50,16 +50,12 @@ To get started with the project, follow these steps:
 
 Here are the basic steps to use the Find the Best Product tool:
 
-1. Run the main script:
+1. Run the database to connect to the local server:
     ```sh
-    python scraper.py #Mac: python3 scraper.py
-    ```
-2. Run the database connect to a local website:
-    ```sh
-    python3 manage.py runserver
+    python manage.py runserver #Mac: python3 manage.py runserver
     ```
 
-3. View the results and searching:
+2. View the results and searching:
 - Click on the local address (for example: http://127.0.0.1:8000/show/)
 
 
@@ -76,4 +72,4 @@ N/A
 
 ## Contact Information
 
-For any questions or feedback, please contact Hayden Phan : haydenphancs@gmail.com
+For any questions or feedback, please get in touch with Hayden Phan : haydenphancs@gmail.com
