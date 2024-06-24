@@ -27,9 +27,11 @@ To get started with the project, follow these steps:
 
 2. **Create and activate a virtual environment** (optional but recommended):
     ```sh
-    python -m venv venv
-    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    python3 -m venv venv
+    source venv/bin/activate  
     ```
+    #On Win: python -m venv venv
+    #On Win: venv\Scripts\activate
 
 3. **Install the required dependencies**:
 - Django
@@ -43,8 +45,9 @@ To get started with the project, follow these steps:
 4. **Set up the database**:
     - If you're using Django with SQLite, run the following commands to apply migrations and create the database:
     ```sh
-    python manage.py migrate
+    python3 manage.py migrate 
     ```
+    #On Win:  python manage.py migrate
 
 ## Usage
 
@@ -52,8 +55,9 @@ Here are the basic steps to use the Find the Best Product tool:
 
 1. Run the database to connect to the local server:
     ```sh
-    python manage.py runserver #Mac: python3 manage.py runserver
+    python3 manage.py runserver 
     ```
+    #On Win: python manage.py runserver
 
 2. View the results and searching:
 - Click on the local address (for example: http://127.0.0.1:8000/show/)
