@@ -1,6 +1,6 @@
 
 .img-fixed-size {
-    width: 100px;
+    width: 140px;
     height: 100px;
     overflow: hidden; /* Hide overflow to maintain fixed size */
 }

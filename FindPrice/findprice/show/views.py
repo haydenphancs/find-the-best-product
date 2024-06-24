@@ -6,10 +6,22 @@ from django.http import HttpResponse
 from parse_each_website import get_data_walmart, get_data_ebay, get_data_amazon
 
 
-def index(request):
-    products = Product.objects.all()
-    return render(request, 'index.html', {'products': products})
+# def index(request):
+#     products = Product.objects.all()
+#     return render(request, 'index.html', {'products': products})
 
+def index(request):
+    walmart_products = Product.objects.filter(source='Walmart')[:4]
+    ebay_products = Product.objects.filter(source='eBay')[:4]
+    amazon_products = Product.objects.filter(source='Amazon')[:4]
+
+    context = {
+        'walmart_products': walmart_products,
+        'ebay_products': ebay_products,
+        'amazon_products': amazon_products,
+    }
+
+    return render(request, 'index.html', context)
 
 def search_results(request):
     if request.method == 'GET':
