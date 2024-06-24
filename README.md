@@ -34,9 +34,8 @@ To get started with the project, follow these steps:
     #On Win: venv\Scripts\activate
 
 3. **Install the required dependencies**:
-- Django
-- SQLite
-- The user can run all of this by running this cmd
+- Django, SQLite, BeautifulSoup4, Playwright,...
+- The user can run all of these by running this cmd
   
     ```sh
     pip install -r requirements.txt
