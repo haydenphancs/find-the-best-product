@@ -44,6 +44,7 @@ To get started with the project, follow these steps:
 4. **Set up the database**:
     - If you're using Django with SQLite, run the following commands to apply migrations and create the database:
     ```sh
+    python3 manage.py makemigrations
     python3 manage.py migrate 
     ```
     #On Win:  python manage.py migrate
