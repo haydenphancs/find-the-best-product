@@ -7,27 +7,68 @@
         <input type="text" name="product_name" placeholder="Search products...">
         <button type="submit">Search</button>
     </form>
-    <h1>RESULTS: </h1>
-
     <form action="{% url 'delete_all_data' %}">
         {% csrf_token %}
         <button type="submit">Delete Data</button>
     </form>
+    <h1>RESULTS: </h1>
+
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+        <h2 > Walmart Products</h2>
+
     <div class="row">
-        {% for product in products %}
+        {% for product in walmart_products %}
             <div class="col">
                 <div class="card" style="width: 10rem;">
                     <div class="img-container ">
-                        <img class="card-img-top" src="{{ product.delivery_info }}" alt="Card image cap">
+                        <img class="card-img-top" src="{{ product.image_link }}" alt="Card image cap">
                     </div>
                     <div class="card-body">
-                        <h5 class="card-title">{{ product.name|slice:":40" }}{% if product.name|length > 40 %}...{% endif %}</h5>
+                        <h5 class="card-title" style="font-size: 18px;">{{ product.name|slice:":60" }}{% if product.name|length > 60 %}...{% endif %}</h5>
                         <p class="card-text">{{ product.price }}</p>
-                        <a href="#" class="btn btn-primary">Add to cart</a>
+                        <a href="{{ product.link }}" target="_blank" class="btn btn-primary">Visit Product</a>
                     </div>
                 </div>
             </div>
         {% endfor %}
     </div>
+      <h2>eBay Products</h2>
+    <div class="row">
+
+        {% for product in ebay_products %}
+            <div class="col">
+                <div class="card" style="width: 10rem;">
+                    <div class="img-container ">
+                        <img class="card-img-top" src="{{ product.image_link }}" alt="Card image cap">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" style="font-size: 18px;">{{ product.name|slice:":60" }}{% if product.name|length > 60 %}...{% endif %}</h5>
+                        <p class="card-text">{{ product.price }}</p>
+                        <a href="{{ product.link }}" target="_blank" class="btn btn-primary">Visit Product</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+<h2>Amazon Products</h2>
+
+    <div class="row">
+        {% for product in amazon_products %}
+            <div class="col">
+                <div class="card" style="width: 10rem;">
+                    <div class="img-container ">
+                        <img class="card-img-top" src="{{ product.image_link }}" alt="Card image cap">
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title" style="font-size: 18px;">{{ product.name|slice:":60" }}{% if product.name|length > 60 %}...{% endif %}</h5>
+                        <p class="card-text">{{ product.price }}</p>
+                        <a href="{{ product.link }}" target="_blank" class="btn btn-primary">Visit Product</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+
+
 {% endblock %}

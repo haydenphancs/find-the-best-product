@@ -34,7 +34,7 @@ async def get_data_amazon(search_query):
                 if span_element_case_1:
                     # Add data to name
                     name_brand = span_element_case_1.text(strip=True)
-                    span_element_case_1_b = result.css_first('span.a-size-base-plus.a-color-base.a-text-normal')
+                    span_element_case_1_b = result.css_first('span[class="a-size-base-plus a-color-base a-text-normal"]')
                     name_title = span_element_case_1_b.text(strip=True)
                     name = name_brand + ' ' + name_title
                 else:
@@ -64,14 +64,14 @@ async def get_data_amazon(search_query):
                 # Find and add data to image_link
                 img_element = result.css_first('.s-image.s-image-optimized-rendering')
                 image_link = img_element.attributes.get('src', '')
-
+                source = 'Amazon'
                 if name and price and href and image_link:
                     #Add all data to database
-                    await add_product_data_amazon(name, price, get_href, image_link)
+                    await add_product_data_amazon(name, price, get_href, image_link, source)
                 else:
                     print('Entry error!')
                 result_number += 1
-                if result_number > 4:
+                if result_number > 5:
                     print('Finished!')
                     break
 
@@ -122,9 +122,10 @@ def get_data_walmart(search_query):
                 image_url = product_images[counter].find('img').get('src')
                 image_link = urljoin(url, image_url)
                 # Adding them all to database
-                add_product_data(name, price, url, image_link)
+                source = 'Walmart'
+                add_product_data(name, price, url, image_link, source)
             counter += 1
-            if counter == 8:
+            if counter == 9:
                 print('Finished!')
                 break
 
@@ -138,7 +139,7 @@ def get_data_walmart(search_query):
 # Use BeautifulSoup method
 # -------------------------------------------------------------------------
 def get_data_ebay(search_query):
-    print('Find products at Ebay...')
+    print('Find products at eBay...')
     url = f"https://www.ebay.com/sch/i.html?_nkw={search_query.replace(' ', '+')}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36",
@@ -174,9 +175,10 @@ def get_data_ebay(search_query):
             image_url = product_images[counter].find('img').get('src')
             image_link = urljoin(url, image_url)
             # Adding them all to database
-            add_product_data(name, price, url, image_link)
+            source = 'eBay'
+            add_product_data(name, price, url, image_link, source)
             counter += 1
-            if counter == 3:
+            if counter == 4:
                 print('Finished!')
                 break
     else:
@@ -187,24 +189,26 @@ def get_data_ebay(search_query):
 # -------------------------------------------------------------------------
 # Add data to a product for Walmart and Ebay
 # -------------------------------------------------------------------------
-def add_product_data(get_name, get_price, get_link, get_image_link):
+def add_product_data(get_name, get_price, get_link, get_image_link, get_source):
     Product.objects.create(
         name=get_name,
         price=get_price,
         link=get_link,
-        delivery_info=get_image_link
+        image_link=get_image_link,
+        source=get_source
     )
 
 
 # -------------------------------------------------------------------------
 # Add directly data to database for Amazon
 # -------------------------------------------------------------------------
-def save_to_db_amazon(get_name, get_price, get_link, get_image_link):
+def save_to_db_amazon(get_name, get_price, get_link, get_image_link, get_source):
     Product.objects.create(
         name=get_name,
         price=get_price,
         link=get_link,
-        delivery_info=get_image_link
+        image_link=get_image_link,
+        source=get_source
     )
 
 # Wrap the synchronous function with sync_to_async
