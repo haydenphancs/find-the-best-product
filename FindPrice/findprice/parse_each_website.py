@@ -59,7 +59,7 @@ async def get_data_amazon(search_query):
                 # Find and add data to get_href
                 a_element = result.css_first('.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
                 href = a_element.attributes.get('href', '')
-                get_href = 'amazon.com' + href
+                get_href = 'https://www.amazon.com' + href
 
                 # Find and add data to image_link
                 img_element = result.css_first('.s-image.s-image-optimized-rendering')
