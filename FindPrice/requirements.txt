@@ -13,5 +13,4 @@ pandas
 playwright
 requests
 scraperapi-sdk
-selectolax
 selenium
