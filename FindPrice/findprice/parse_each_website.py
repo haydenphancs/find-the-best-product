@@ -62,8 +62,11 @@ async def get_data_amazon(search_query):
                 get_href = 'https://www.amazon.com' + href
 
                 # Find and add data to image_link
-                img_element = result.css_first('.s-image.s-image-optimized-rendering')
-                image_link = img_element.attributes.get('src', '')
+                img_element = result.css_first('.a-section.aok-relative.s-image-tall-aspect img')
+                if img_element:
+                    image_link = img_element.attributes.get('src', '')
+                else:
+                    image_link = "None"
                 source = 'Amazon'
                 if name and price and href and image_link:
                     #Add all data to database
@@ -94,6 +97,8 @@ def get_data_walmart(search_query):
         "DNT": "1", "Connection": "close", "Upgrade-Insecure-Requests": "1"}
 
     response = requests.get(url, headers=headers)
+
+
     if response:
         soup1 = BeautifulSoup(response.content, "html.parser")
         soup2 = BeautifulSoup(soup1.prettify(), "html.parser")
@@ -103,7 +108,7 @@ def get_data_walmart(search_query):
         # find all the prices
         product_prices = element.find_all('div', {'data-automation-id': 'product-price'})
         # find all the links
-        product_links = element.find_all('a', class_="absolute w-100 h-100 z-1 hide-sibling-opacity", href=True)
+        product_links = element.find_all('a', class_="w-100 h-100 z-1 hide-sibling-opacity absolute", href=True)
         # find all image links
         product_images = element.find_all('div', class_="relative overflow-hidden")
 
@@ -113,7 +118,9 @@ def get_data_walmart(search_query):
                 # Adding data to name
                 name = product_names[counter].get_text(strip=True)
                 # Find and add data to price
+
                 prices = product_prices[counter].find('span', class_='w_iUH7')
+
                 price_string = prices.get_text(strip=True)
                 price = extract_price(price_string)
                 # Adding data to url
