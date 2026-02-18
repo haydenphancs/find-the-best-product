@@ -2,3 +2,5 @@
 db.sqlite3
 .env
 .venv
+findprice/venv
+FindPrice/findprice/venv
