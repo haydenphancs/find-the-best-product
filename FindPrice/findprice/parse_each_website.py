@@ -29,13 +29,11 @@ async def get_data_amazon(search_query):
                 print('Amazon: Could not find main result container.')
                 return
 
-            result_number = 2
-            while result_number <= 5:
+            for result_number in range(2, 6):
                 try:
                     selector = f'div[data-cel-widget="search_result_{result_number}"]'
                     result = main_result.css_first(selector)
                     if not result:
-                        result_number += 1
                         continue
 
                     # Find data to name
@@ -57,14 +55,12 @@ async def get_data_amazon(search_query):
                     price_whole_el = result.css_first('.a-price-whole')
                     price_fraction_el = result.css_first('.a-price-fraction')
                     if not price_whole_el:
-                        result_number += 1
                         continue
                     price = '$' + price_whole_el.text(strip=True) + (price_fraction_el.text(strip=True) if price_fraction_el else '00')
 
                     # Find and add data to get_href
                     a_element = result.css_first('.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
                     if not a_element:
-                        result_number += 1
                         continue
                     href = a_element.attributes.get('href', '')
                     get_href = 'https://www.amazon.com' + href
@@ -79,8 +75,6 @@ async def get_data_amazon(search_query):
 
                 except Exception as e:
                     print(f'Amazon: Error parsing result #{result_number}: {e}')
-                finally:
-                    result_number += 1
 
             print('Amazon: Finished!')
 
