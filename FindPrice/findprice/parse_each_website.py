@@ -114,11 +114,43 @@ async def get_data_walmart(search_query):
                     saved += 1
             print(f'Walmart: Finished! Saved {saved} products.')
 
-    except Exception as e:
-        print(f'Walmart: Scraping failed: {e}')
-    finally:
-        if browser:
-            await browser.close()
+    counter = 0
+    for link in product_links:
+        if counter > 4:
+            try:
+                if counter >= len(product_names) or counter >= len(product_prices) or counter >= len(product_images):
+                    break
+                # Adding data to name
+                name = product_names[counter].get_text(strip=True)
+                # Find and add data to price
+
+                prices = product_prices[counter].find('span', class_='w_iUH7')
+                if not prices:
+                    counter += 1
+                    continue
+                price_string = prices.get_text(strip=True)
+                price = extract_price(price_string)
+                if not price:
+                    counter += 1
+                    continue
+                # Adding data to url
+                product_url = "https://www.walmart.com" + link["href"]
+                # Find and Add data to image_url
+                img_tag = product_images[counter].find('img')
+                if not img_tag:
+                    counter += 1
+                    continue
+                image_url = img_tag.get('src')
+                image_link = urljoin(product_url, image_url)
+                # Adding them all to database
+                source = 'Walmart'
+                add_product_data(name, price, product_url, image_link, source)
+            except Exception as e:
+                print(f'Walmart: Error parsing product #{counter}: {e}')
+        counter += 1
+        if counter == 9:
+            print('Walmart: Finished!')
+            break
 
 
 # -------------------------------------------------------------------------

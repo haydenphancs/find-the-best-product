@@ -5,6 +5,10 @@ import asyncio
 from parse_each_website import scrape_all
 
 
+# def index(request):
+#     products = Product.objects.all()
+#     return render(request, 'index.html', {'products': products})
+
 def index(request):
     walmart_products = Product.objects.filter(source='Walmart')[:8]
     ebay_products = Product.objects.filter(source='eBay')[:8]
