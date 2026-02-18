@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import Product
 import asyncio
 
-from parse_each_website import get_data_walmart, get_data_ebay, get_data_amazon
+from parse_each_website import scrape_all
 
 
 # def index(request):
@@ -22,32 +22,16 @@ def index(request):
 
     return render(request, 'index.html', context)
 
+
 def search_results(request):
     if request.method == 'GET':
         product_name = request.GET.get('product_name', '')
-
-        # Perform scraping for each website based on user input
         if product_name:
-            try:
-                get_data_walmart(product_name)
-            except Exception as e:
-                print(f'Walmart scraper error: {e}')
-
-            try:
-                get_data_ebay(product_name)
-            except Exception as e:
-                print(f'eBay scraper error: {e}')
-
-            try:
-                asyncio.run(get_data_amazon(product_name))
-            except Exception as e:
-                print(f'Amazon scraper error: {e}')
+            asyncio.run(scrape_all(product_name))
 
     return redirect('index')
 
 
 def delete_all_data(request):
     Product.objects.all().delete()
-    return redirect('index')  # redirect to home page or any other page after deletion
-
-
+    return redirect('index')
