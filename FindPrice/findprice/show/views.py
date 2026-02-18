@@ -1,13 +1,8 @@
 from django.shortcuts import render, redirect
 from .models import Product
-import asyncio
 
 from parse_each_website import scrape_all
 
-
-# def index(request):
-#     products = Product.objects.all()
-#     return render(request, 'index.html', {'products': products})
 
 def index(request):
     walmart_products = Product.objects.filter(source='Walmart')[:8]
@@ -27,7 +22,7 @@ def search_results(request):
     if request.method == 'GET':
         product_name = request.GET.get('product_name', '')
         if product_name:
-            asyncio.run(scrape_all(product_name))
+            scrape_all(product_name)
 
     return redirect('index')
 
