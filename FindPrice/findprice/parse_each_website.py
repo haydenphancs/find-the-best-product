@@ -16,72 +16,79 @@ import re
 async def get_data_amazon(search_query):
     print('Find products at Amazon...')
     url = f"https://www.amazon.com/s?k={search_query}"
-    async with async_playwright() as pw:
-        browser = await pw.chromium.launch()
-        page = await browser.new_page()
-        await page.goto(url)
-        await page.wait_for_selector('.s-main-slot')
-        tree = HTMLParser(await page.content())
-        if page:
+    browser = None
+    try:
+        async with async_playwright() as pw:
+            browser = await pw.chromium.launch()
+            page = await browser.new_page()
+            await page.goto(url)
+            await page.wait_for_selector('.s-main-slot', timeout=10000)
+            tree = HTMLParser(await page.content())
             main_result = tree.css_first('.s-main-slot')
+            if not main_result:
+                print('Amazon: Could not find main result container.')
+                return
+
             result_number = 2
-            while True:
-                selector = f'div[data-cel-widget="search_result_{result_number}"]'
-                result = main_result.css_first(selector)
+            while result_number <= 5:
+                try:
+                    selector = f'div[data-cel-widget="search_result_{result_number}"]'
+                    result = main_result.css_first(selector)
+                    if not result:
+                        result_number += 1
+                        continue
 
-                # Find data to name
-                span_element_case_1 = result.css_first('span[class="a-size-base-plus a-color-base"]')
-                if span_element_case_1:
-                    # Add data to name
-                    name_brand = span_element_case_1.text(strip=True)
-                    span_element_case_1_b = result.css_first('span[class="a-size-base-plus a-color-base a-text-normal"]')
-                    name_title = span_element_case_1_b.text(strip=True)
-                    name = name_brand + ' ' + name_title
-                else:
-                    # Find and add data to name
-                    span_element_case_2 = result.css_first('span[class="a-size-medium a-color-base a-text-bold a-text-normal"]')
-                    if span_element_case_2:
-                        name_brand = span_element_case_2.text(strip=True)
+                    # Find data to name
+                    name = ''
+                    span_element_case_1 = result.css_first('span[class="a-size-base-plus a-color-base"]')
+                    if span_element_case_1:
+                        name_brand = span_element_case_1.text(strip=True)
+                        span_element_case_1_b = result.css_first('span[class="a-size-base-plus a-color-base a-text-normal"]')
+                        name_title = span_element_case_1_b.text(strip=True) if span_element_case_1_b else ''
+                        name = (name_brand + ' ' + name_title).strip()
                     else:
-                        name_brand = ''
-                    span_element_case_2_b = result.css_first('span[class="a-size-medium a-color-base a-text-normal"]')
-                    if span_element_case_2_b:
-                        name_title = span_element_case_2_b.text(strip=True)
-                    else:
-                        name_title = ''
-                    name = name_brand + ' ' + name_title
+                        span_element_case_2 = result.css_first('span[class="a-size-medium a-color-base a-text-bold a-text-normal"]')
+                        name_brand = span_element_case_2.text(strip=True) if span_element_case_2 else ''
+                        span_element_case_2_b = result.css_first('span[class="a-size-medium a-color-base a-text-normal"]')
+                        name_title = span_element_case_2_b.text(strip=True) if span_element_case_2_b else ''
+                        name = (name_brand + ' ' + name_title).strip()
 
-                # Find and add data to price
-                price_whole_element = result.css_first('.a-price-whole').text(strip=True)
-                price_fraction_element = result.css_first('.a-price-fraction').text(strip=True)
-                price = '$' + price_whole_element + price_fraction_element
+                    # Find and add data to price
+                    price_whole_el = result.css_first('.a-price-whole')
+                    price_fraction_el = result.css_first('.a-price-fraction')
+                    if not price_whole_el:
+                        result_number += 1
+                        continue
+                    price = '$' + price_whole_el.text(strip=True) + (price_fraction_el.text(strip=True) if price_fraction_el else '00')
 
-                # Find and add data to get_href
-                a_element = result.css_first('.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
-                href = a_element.attributes.get('href', '')
-                get_href = 'https://www.amazon.com' + href
+                    # Find and add data to get_href
+                    a_element = result.css_first('.a-link-normal.s-underline-text.s-underline-link-text.s-link-style.a-text-normal')
+                    if not a_element:
+                        result_number += 1
+                        continue
+                    href = a_element.attributes.get('href', '')
+                    get_href = 'https://www.amazon.com' + href
 
-                # Find and add data to image_link
-                img_element = result.css_first('.a-section.aok-relative.s-image-tall-aspect img')
-                if img_element:
-                    image_link = img_element.attributes.get('src', '')
-                else:
-                    image_link = "None"
-                source = 'Amazon'
-                if name and price and href and image_link:
-                    #Add all data to database
-                    await add_product_data_amazon(name, price, get_href, image_link, source)
-                else:
-                    print('Entry error!')
-                result_number += 1
-                if result_number > 5:
-                    print('Finished!')
-                    break
+                    # Find and add data to image_link
+                    img_element = result.css_first('.a-section.aok-relative.s-image-tall-aspect img')
+                    image_link = img_element.attributes.get('src', '') if img_element else 'None'
 
-        else:
-            return 'Error parser the page!'
+                    source = 'Amazon'
+                    if name and price and href:
+                        await add_product_data_amazon(name, price, get_href, image_link, source)
 
-        await browser.close()
+                except Exception as e:
+                    print(f'Amazon: Error parsing result #{result_number}: {e}')
+                finally:
+                    result_number += 1
+
+            print('Amazon: Finished!')
+
+    except Exception as e:
+        print(f'Amazon: Scraping failed: {e}')
+    finally:
+        if browser:
+            await browser.close()
 
 
 # -------------------------------------------------------------------------
@@ -96,49 +103,69 @@ def get_data_walmart(search_query):
         "Accept-Encoding": "gzip, deflate", "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "DNT": "1", "Connection": "close", "Upgrade-Insecure-Requests": "1"}
 
-    response = requests.get(url, headers=headers)
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+    except requests.RequestException as e:
+        print(f'Walmart: Request failed: {e}')
+        return None
 
+    if not response or response.status_code != 200:
+        print(f'Walmart: Bad response (status {response.status_code if response else "None"})')
+        return None
 
-    if response:
-        soup1 = BeautifulSoup(response.content, "html.parser")
-        soup2 = BeautifulSoup(soup1.prettify(), "html.parser")
-        element = soup2.find("div", id='0', class_="flex flex-column justify-center")
-        # find all the names
-        product_names = soup2.find_all('span',{'data-automation-id': 'product-title'})
-        # find all the prices
-        product_prices = element.find_all('div', {'data-automation-id': 'product-price'})
-        # find all the links
-        product_links = element.find_all('a', class_="w-100 h-100 z-1 hide-sibling-opacity absolute", href=True)
-        # find all image links
-        product_images = element.find_all('div', class_="relative overflow-hidden")
+    soup1 = BeautifulSoup(response.content, "html.parser")
+    soup2 = BeautifulSoup(soup1.prettify(), "html.parser")
+    element = soup2.find("div", id='0', class_="flex flex-column justify-center")
 
-        counter = 0
-        for link in product_links:
-            if counter > 4:
+    if not element:
+        print('Walmart: Could not find main product container. Site structure may have changed.')
+        return None
+
+    # find all the names
+    product_names = soup2.find_all('span', {'data-automation-id': 'product-title'})
+    # find all the prices
+    product_prices = element.find_all('div', {'data-automation-id': 'product-price'})
+    # find all the links
+    product_links = element.find_all('a', class_="w-100 h-100 z-1 hide-sibling-opacity absolute", href=True)
+    # find all image links
+    product_images = element.find_all('div', class_="relative overflow-hidden")
+
+    counter = 0
+    for link in product_links:
+        if counter > 4:
+            try:
+                if counter >= len(product_names) or counter >= len(product_prices) or counter >= len(product_images):
+                    break
                 # Adding data to name
                 name = product_names[counter].get_text(strip=True)
                 # Find and add data to price
-
                 prices = product_prices[counter].find('span', class_='w_iUH7')
-
+                if not prices:
+                    counter += 1
+                    continue
                 price_string = prices.get_text(strip=True)
                 price = extract_price(price_string)
+                if not price:
+                    counter += 1
+                    continue
                 # Adding data to url
-                url = "https://www.walmart.com" + link["href"]
+                product_url = "https://www.walmart.com" + link["href"]
                 # Find and Add data to image_url
-                image_url = product_images[counter].find('img').get('src')
-                image_link = urljoin(url, image_url)
+                img_tag = product_images[counter].find('img')
+                if not img_tag:
+                    counter += 1
+                    continue
+                image_url = img_tag.get('src')
+                image_link = urljoin(product_url, image_url)
                 # Adding them all to database
                 source = 'Walmart'
-                add_product_data(name, price, url, image_link, source)
-            counter += 1
-            if counter == 9:
-                print('Finished!')
-                break
-
-    else:
-        print('Walmart Bad')
-        return None
+                add_product_data(name, price, product_url, image_link, source)
+            except Exception as e:
+                print(f'Walmart: Error parsing product #{counter}: {e}')
+        counter += 1
+        if counter == 9:
+            print('Walmart: Finished!')
+            break
 
 
 # -------------------------------------------------------------------------
@@ -153,44 +180,69 @@ def get_data_ebay(search_query):
         "Accept-Encoding": "gzip, deflate", "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "DNT": "1", "Connection": "close", "Upgrade-Insecure-Requests": "1"}
 
-    response = requests.get(url)
-    if response:
+    try:
+        response = requests.get(url, headers=headers, timeout=15)
+    except requests.RequestException as e:
+        print(f'eBay: Request failed: {e}')
+        return None
 
-        soup1 = BeautifulSoup(response.content, "html.parser")
-        soup2 = BeautifulSoup(soup1.prettify(), "html.parser")
+    if not response or response.status_code != 200:
+        print(f'eBay: Bad response (status {response.status_code if response else "None"})')
+        return None
 
-        element = soup2.find("div", id="srp-river-results", class_="srp-river-results clearfix")
+    soup1 = BeautifulSoup(response.content, "html.parser")
+    soup2 = BeautifulSoup(soup1.prettify(), "html.parser")
 
-        # find all the names
-        product_names = element.find_all('div',class_="s-item__title")
-        # find all the prices
-        product_prices = element.find_all('div', class_="s-item__details-section--primary")
-        # find all the links
-        product_links = element.find_all('a', class_="s-item__link", href=True)
-        # find all image links
-        product_images = element.find_all('div', class_="s-item__image-wrapper image-treatment")
+    element = soup2.find("div", id="srp-river-results", class_="srp-river-results clearfix")
 
-        counter = 0
-        for names in product_names:
+    if not element:
+        print('eBay: Could not find main product container. Site structure may have changed.')
+        return None
+
+    # find all the names
+    product_names = element.find_all('div', class_="s-item__title")
+    # find all the prices
+    product_prices = element.find_all('div', class_="s-item__details-section--primary")
+    # find all the links
+    product_links = element.find_all('a', class_="s-item__link", href=True)
+    # find all image links
+    product_images = element.find_all('div', class_="s-item__image-wrapper image-treatment")
+
+    counter = 0
+    for names in product_names:
+        try:
+            if counter >= len(product_prices) or counter >= len(product_links) or counter >= len(product_images):
+                break
             # Adding data to name
-            name = names.find('span', {'role': 'heading'}).get_text(strip=True)
+            heading = names.find('span', {'role': 'heading'})
+            if not heading:
+                counter += 1
+                continue
+            name = heading.get_text(strip=True)
             # Find and add data to price
-            price = product_prices[counter].find('span', class_='s-item__price').get_text(strip=True)
+            price_el = product_prices[counter].find('span', class_='s-item__price')
+            if not price_el:
+                counter += 1
+                continue
+            price = price_el.get_text(strip=True)
             # Adding data to url
-            url = product_links[counter]["href"]
+            product_url = product_links[counter]["href"]
             # Find and Add data to image_url
-            image_url = product_images[counter].find('img').get('src')
-            image_link = urljoin(url, image_url)
+            img_tag = product_images[counter].find('img')
+            if not img_tag:
+                counter += 1
+                continue
+            image_url = img_tag.get('src')
+            image_link = urljoin(product_url, image_url)
             # Adding them all to database
             source = 'eBay'
-            add_product_data(name, price, url, image_link, source)
-            counter += 1
-            if counter == 4:
-                print('Finished!')
-                break
-    else:
-        print('Ebay Bad')
-        return None
+            add_product_data(name, price, product_url, image_link, source)
+        except Exception as e:
+            print(f'eBay: Error parsing product #{counter}: {e}')
+        counter += 1
+        if counter == 4:
+            print('eBay: Finished!')
+            break
 
 
 # -------------------------------------------------------------------------
@@ -231,49 +283,3 @@ def extract_price(price_string):
     if match:
         return match.group(0)
     return None
-
-# For BeautifulSoup to find amazon data
-# -------------------------------------------------------------------------
-# find data Amazon for each product
-# -------------------------------------------------------------------------
-
-# def find_name_amazon(item):
-#     name_tag = item.find('span', id='productTitle', class_='a-size-large product-title-word-break').get_text(strip=True)
-#     if name_tag:
-#         return name_tag
-#     return 'None'
-#
-# def find_price_amazon(item):
-#     price1 = item.find('div', id='corePrice_desktop', class_='celwidget')
-#     if price1:
-#         price_spans = price1.find_all('span', class_='a-offscreen')
-#         prices = [price.get_text(strip=True) for price in price_spans]
-#         concatenated_prices = ' - '.join(prices)
-#         if concatenated_prices:
-#             return concatenated_prices
-#
-#     price1 = item.find('div', id="corePrice_feature_div", class_="celwidget")
-#     if price1:
-#         price_spans = price1.find('span', class_='a-offscreen').get_text(strip=True)
-#         # prices = [price.get_text(strip=True) for price in price_spans]
-#         # concatenated_prices2 = ' - '.join(prices)
-#         if price_spans:
-#             return price_spans
-#
-#     return 'None'
-#
-# def find_image_amazon(item, url):
-#     image_div = item.find('div', id='imgTagWrapperId', class_="imgTagWrapper")
-#     if image_div:
-#         img = image_div.find('img')
-#         if img:
-#             image_url = img.get('src')
-#             # Handle relative URLs
-#             image_url = urljoin(url, image_url)
-#             return image_url
-#     return 'None'
-#
-
-# -------------------------------------------------------------------------
-# Add product to database for Walmart and Ebay
-# -------------------------------------------------------------------------
