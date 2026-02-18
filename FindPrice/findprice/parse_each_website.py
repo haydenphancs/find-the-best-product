@@ -3,6 +3,20 @@ from show.models import Product
 from playwright.async_api import async_playwright
 from asgiref.sync import sync_to_async
 
+# -------------------------------------------------------------------------
+# Save product to database (Moved to top for cleaner access)
+# -------------------------------------------------------------------------
+def save_product(name, price, link, image_link, source):
+    Product.objects.create(
+        name=name,
+        price=price,
+        link=link,
+        image_link=image_link,
+        source=source
+    )
+
+save_product_async = sync_to_async(save_product)
+
 
 # -------------------------------------------------------------------------
 # Get data from Amazon using Playwright
@@ -64,6 +78,12 @@ async def get_data_walmart(search_query):
         async with async_playwright() as pw:
             browser = await pw.chromium.launch(headless=True)
             page = await browser.new_page()
+            
+            # Set User Agent to avoid immediate blocking
+            await page.set_extra_http_headers({
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            })
+
             await page.goto(url, wait_until='domcontentloaded')
             await page.wait_for_selector('[data-automation-id="product-title"]', timeout=15000)
 
@@ -76,8 +96,10 @@ async def get_data_walmart(search_query):
                     let card = titleEl.closest('[data-item-id]')
                         || titleEl.closest('[data-testid]')
                         || titleEl.closest('li');
+                    
                     if (!card) {
                         card = titleEl;
+                        // Fallback search up the tree
                         for (let j = 0; j < 8; j++) {
                             if (card.parentElement) card = card.parentElement;
                             if (card.querySelector('img') && card.querySelector('a[href*="/ip/"]')) break;
@@ -85,7 +107,7 @@ async def get_data_walmart(search_query):
                     }
 
                     const linkEl = card.querySelector('a[href*="/ip/"]') || titleEl.closest('a');
-                    const imgEl = card.querySelector('img[src]');
+                    const imgEl = card.querySelector('img');
                     const priceEl = card.querySelector('[data-automation-id="product-price"]')
                         || card.querySelector('[itemprop="price"]');
 
@@ -114,43 +136,11 @@ async def get_data_walmart(search_query):
                     saved += 1
             print(f'Walmart: Finished! Saved {saved} products.')
 
-    counter = 0
-    for link in product_links:
-        if counter > 4:
-            try:
-                if counter >= len(product_names) or counter >= len(product_prices) or counter >= len(product_images):
-                    break
-                # Adding data to name
-                name = product_names[counter].get_text(strip=True)
-                # Find and add data to price
-
-                prices = product_prices[counter].find('span', class_='w_iUH7')
-                if not prices:
-                    counter += 1
-                    continue
-                price_string = prices.get_text(strip=True)
-                price = extract_price(price_string)
-                if not price:
-                    counter += 1
-                    continue
-                # Adding data to url
-                product_url = "https://www.walmart.com" + link["href"]
-                # Find and Add data to image_url
-                img_tag = product_images[counter].find('img')
-                if not img_tag:
-                    counter += 1
-                    continue
-                image_url = img_tag.get('src')
-                image_link = urljoin(product_url, image_url)
-                # Adding them all to database
-                source = 'Walmart'
-                add_product_data(name, price, product_url, image_link, source)
-            except Exception as e:
-                print(f'Walmart: Error parsing product #{counter}: {e}')
-        counter += 1
-        if counter == 9:
-            print('Walmart: Finished!')
-            break
+    except Exception as e:
+        print(f'Walmart: Scraping failed: {e}')
+    finally:
+        if browser:
+            await browser.close()
 
 
 # -------------------------------------------------------------------------
@@ -202,21 +192,6 @@ async def get_data_ebay(search_query):
     finally:
         if browser:
             await browser.close()
-
-
-# -------------------------------------------------------------------------
-# Save product to database
-# -------------------------------------------------------------------------
-def save_product(name, price, link, image_link, source):
-    Product.objects.create(
-        name=name,
-        price=price,
-        link=link,
-        image_link=image_link,
-        source=source
-    )
-
-save_product_async = sync_to_async(save_product)
 
 
 # -------------------------------------------------------------------------
